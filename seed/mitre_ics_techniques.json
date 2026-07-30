@@ -1,0 +1,9 @@
+[
+  {"codigo": "T0816", "nombre": "Device Restart/Shutdown", "descripcion": "El atacante fuerza el reinicio o apagado de un dispositivo OT para interrumpir el proceso físico controlado."},
+  {"codigo": "T0836", "nombre": "Modify Parameter", "descripcion": "El atacante altera parámetros de control de un proceso para provocar un comportamiento fuera de rango seguro."},
+  {"codigo": "T0843", "nombre": "Program Download", "descripcion": "El atacante carga lógica de control maliciosa en un PLC u otro dispositivo programable."},
+  {"codigo": "T0846", "nombre": "Remote System Discovery", "descripcion": "El atacante enumera activos y topología de la red OT tras un acceso inicial."},
+  {"codigo": "T0855", "nombre": "Unauthorized Command Message", "descripcion": "El atacante envía comandos no autorizados a dispositivos de campo mediante protocolos industriales sin autenticación robusta."},
+  {"codigo": "T0859", "nombre": "Valid Accounts", "descripcion": "El atacante utiliza credenciales legítimas comprometidas para moverse dentro del entorno OT sin ser detectado."},
+  {"codigo": "T0886", "nombre": "Remote Services", "descripcion": "El atacante abusa de servicios de acceso remoto mal asegurados (RDP, VPN, VNC) para entrar en la red OT."}
+]

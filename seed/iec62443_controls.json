@@ -1,0 +1,12 @@
+[
+  {"codigo": "SR 1.1", "nombre": "Identificación y autenticación de usuarios humanos", "descripcion": "El sistema debe identificar y autenticar de forma unívoca a cada usuario humano antes de permitir cualquier acción."},
+  {"codigo": "SR 1.2", "nombre": "Identificación y autenticación de procesos y dispositivos", "descripcion": "El sistema debe identificar y autenticar de forma unívoca a los dispositivos y procesos que se comunican entre sí."},
+  {"codigo": "SR 2.1", "nombre": "Control de autorización", "descripcion": "El sistema debe aplicar la autorización asignada a cada usuario, proceso o dispositivo para las acciones que intenta realizar."},
+  {"codigo": "SR 3.1", "nombre": "Integridad de la comunicación", "descripcion": "El sistema debe proteger la integridad de la información transmitida frente a manipulación no autorizada."},
+  {"codigo": "SR 3.8", "nombre": "Detección de código malicioso", "descripcion": "El sistema debe emplear mecanismos de detección y prevención de código malicioso en los puntos de entrada y salida de la red OT."},
+  {"codigo": "SR 5.1", "nombre": "Segmentación de red", "descripcion": "El sistema debe segmentar la red en zonas y conductos, restringiendo el flujo de tráfico entre ellos según su nivel de confianza."},
+  {"codigo": "SR 5.2", "nombre": "Protección de límites de zona", "descripcion": "El sistema debe controlar el tráfico que atraviesa los límites de cada zona mediante mecanismos como cortafuegos o diodos de datos."},
+  {"codigo": "SR 6.2", "nombre": "Monitorización continua", "descripcion": "El sistema debe permitir la monitorización continua de eventos de seguridad relevantes en los activos OT."},
+  {"codigo": "SR 7.3", "nombre": "Copias de seguridad del sistema de control", "descripcion": "Deben existir copias de seguridad periódicas y verificadas de la configuración y datos de los sistemas de control."},
+  {"codigo": "SR 7.6", "nombre": "Gestión de la configuración de red y seguridad", "descripcion": "El sistema debe mantener documentada y controlada la configuración de red y de seguridad de todos los activos OT."}
+]

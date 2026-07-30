@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Sentra OS — {{ cliente_nombre }}</title>
+<style>
+    @page {
+        size: A4;
+        margin: 2.2cm 1.8cm;
+        @bottom-center {
+            content: "Sentra OS · OT Assessment Engine · Página " counter(page) " de " counter(pages);
+            font-size: 8px;
+            color: #999;
+        }
+    }
+    body { font-family: 'Helvetica', 'Arial', sans-serif; color: #1c1c1c; font-size: 11.5px; line-height: 1.55; }
+    .brand { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #0e3b5c; font-weight: bold; }
+    .header { display: flex; justify-content: space-between; border-bottom: 3px solid #0e3b5c; padding-bottom: 14px; margin-bottom: 26px; }
+    .header h1 { font-size: 21px; color: #0e3b5c; margin: 4px 0 0 0; }
+    .header .sub { color: #555; font-size: 12px; }
+    .header .meta { text-align: right; font-size: 10.5px; color: #666; }
+
+    .score-box { display: flex; align-items: center; gap: 22px; padding: 20px; border-radius: 8px; margin-bottom: 20px;
+        background: #f5f7f9; border-left: 7px solid {{ '#b02a2a' if nivel == 'crítico' else '#c9720e' if nivel == 'alto' else '#b58900' if nivel == 'medio' else '#1f8a4c' }}; }
+    .score-value { font-size: 44px; font-weight: bold; color: #0e3b5c; }
+    .score-nivel { font-size: 15px; text-transform: uppercase; font-weight: bold;
+        color: {{ '#b02a2a' if nivel == 'crítico' else '#c9720e' if nivel == 'alto' else '#b58900' if nivel == 'medio' else '#1f8a4c' }}; }
+
+    .desglose { display: flex; gap: 14px; margin-bottom: 24px; }
+    .desglose .chip { background: #eef2f5; border-radius: 6px; padding: 8px 14px; font-size: 10.5px; }
+    .desglose .chip b { color: #0e3b5c; font-size: 13px; display: block; }
+
+    h2.section { font-size: 14px; color: #0e3b5c; border-bottom: 1px solid #d8dde1; padding-bottom: 6px; margin-top: 30px; }
+    .resumen-ejecutivo { text-align: justify; color: #333; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { text-align: left; padding: 7px 9px; border-bottom: 1px solid #e4e7ea; font-size: 10px; vertical-align: top; }
+    th { background: #0e3b5c; color: white; font-weight: normal; }
+    .crit-alta { color: #b02a2a; font-weight: bold; }
+    .crit-media { color: #b58900; font-weight: bold; }
+    .crit-baja { color: #1f8a4c; }
+
+    .fase-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 9px; color: white; }
+    .fase-quick { background: #1f8a4c; }
+    .fase-medio { background: #c9720e; }
+    .fase-largo { background: #555; }
+
+    .footer-note { margin-top: 26px; font-size: 8.5px; color: #999; }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <div>
+        <div class="brand">Sentra OS · OT Assessment Engine</div>
+        <h1>Informe de evaluación de riesgo OT/IoMT</h1>
+        <div class="sub">{{ cliente_nombre }}{% if sector %} · {{ sector }}{% endif %} — {{ assessment_nombre }}</div>
+    </div>
+    <div class="meta">
+        Generado: {{ fecha }}<br>
+        {% if alcance %}Alcance: {{ alcance }}{% endif %}
+    </div>
+</div>
+
+<div class="score-box">
+    <div class="score-value">{{ score }}</div>
+    <div>
+        <div class="score-nivel">Riesgo: {{ nivel }}</div>
+        <div>Score global ponderado por criticidad de negocio y grado de implantación de controles.</div>
+    </div>
+</div>
+
+{% if desglose %}
+<div class="desglose">
+    {% for framework, valor in desglose.items() %}
+    <div class="chip"><b>{{ valor }}</b>{{ framework }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if resumen_ejecutivo %}
+<h2 class="section">Resumen ejecutivo</h2>
+<div class="resumen-ejecutivo">
+    {% for parrafo in resumen_ejecutivo.split('\n') if parrafo.strip() %}
+    <p>{{ parrafo }}</p>
+    {% endfor %}
+</div>
+{% endif %}
+
+<h2 class="section">Hallazgos por control</h2>
+<table>
+    <thead>
+        <tr><th>Control</th><th>Estado</th><th>Crit.</th><th>Impacto de negocio</th><th>Quick win</th></tr>
+    </thead>
+    <tbody>
+        {% for h in hallazgos %}
+        <tr>
+            <td><b>{{ h.codigo }}</b><br>{{ h.nombre }}</td>
+            <td>{{ h.estado }}</td>
+            <td class="{{ 'crit-alta' if h.criticidad >= 7 else 'crit-media' if h.criticidad >= 4 else 'crit-baja' }}">{{ h.criticidad }}/10</td>
+            <td>{{ h.impacto or '—' }}</td>
+            <td>{{ h.quick_win or '—' }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if roadmap %}
+<h2 class="section">Roadmap de remediación</h2>
+<table>
+    <thead>
+        <tr><th>#</th><th>Fase</th><th>Acción</th><th>Horas est.</th><th>Coste est.</th></tr>
+    </thead>
+    <tbody>
+        {% for r in roadmap %}
+        <tr>
+            <td>{{ r.prioridad }}</td>
+            <td>
+                <span class="fase-badge {{ 'fase-quick' if r.fase == 'Quick win' else 'fase-medio' if r.fase == 'Medio plazo' else 'fase-largo' }}">
+                    {{ r.fase }}
+                </span>
+            </td>
+            <td>{{ r.titulo }}</td>
+            <td>{{ r.horas or '—' }}</td>
+            <td>{{ r.coste_estimado or '—' }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+<div class="footer-note">
+    Informe generado por Sentra OS — OT Assessment Engine. El score y la priorización del roadmap
+    son reproducibles a partir de los objetos de conocimiento registrados por control.
+</div>
+
+</body>
+</html>
