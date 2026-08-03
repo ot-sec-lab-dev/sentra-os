@@ -32,6 +32,7 @@ def registrar_cuestionario(assessment_id: int, respuestas: list[dict]) -> dict:
                 coste_estimado=respuesta.get("coste_estimado", ""),
                 horas=respuesta.get("horas"),
                 origen="cuestionario",
+                asset_id=respuesta.get("asset_id"),
             )
             ok.append(eval_id)
         except Exception as e:

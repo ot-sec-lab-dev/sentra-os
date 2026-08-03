@@ -3,8 +3,8 @@ Report Engine / PDF Builder
 ----------------------------
 Punto de ensamblaje final: toma lo que ya han producido Risk Engine,
 Roadmap Engine y (opcionalmente) AI Engine, y los vuelca en la plantilla
-HTML de marca "Sentra OS", generando el PDF con WeasyPrint.
-Este módulo no calcula nada — solo lee y presenta.
+HTML de marca "Sentra OS", generando el informe con WeasyPrint (PDF) o
+directamente en HTML. Este módulo no calcula nada — solo lee y presenta.
 """
 
 import os
@@ -12,12 +12,6 @@ from datetime import datetime
 
 from sqlalchemy import text
 from jinja2 import Environment, FileSystemLoader
-
-try:
-    from weasyprint import HTML
-    PDF_AVAILABLE = True
-except Exception:
-    PDF_AVAILABLE = False
 
 from db import engine
 
@@ -27,7 +21,16 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 jinja_env = Environment(loader=FileSystemLoader("templates"))
 
 
-def generar_informe(assessment_id: int, resumen_ejecutivo: str = "") -> dict:
+def generar_informe(assessment_id: int, resumen_ejecutivo: str = "", formato: str = "html") -> dict:
+    """
+    formato: "html" (por defecto, sin dependencias externas) o "pdf" (requiere
+    WeasyPrint funcionando). El modo HTML nunca importa WeasyPrint, así que
+    un WeasyPrint roto en el contenedor no bloquea Interview/Risk/Roadmap/AI
+    Engine ni la revisión del informe.
+    """
+    if formato not in ("html", "pdf"):
+        raise ValueError("formato debe ser 'html' o 'pdf'")
+
     with engine.begin() as conn:
         assessment = conn.execute(
             text(
@@ -97,26 +100,24 @@ def generar_informe(assessment_id: int, resumen_ejecutivo: str = "") -> dict:
             fecha=datetime.now().strftime("%d/%m/%Y %H:%M"),
         )
 
-        # Temporalmente generamos siempre HTML para validar el motor de informes
-        filename = f"sentra_os_informe_{assessment_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}.html"
-        pdf_path = os.path.join(OUTPUT_DIR, filename)
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        extension = "pdf" if formato == "pdf" else "html"
+        filename = f"sentra_os_informe_{assessment_id}_{timestamp}.{extension}"
+        output_path = os.path.join(OUTPUT_DIR, filename)
 
-        with open(pdf_path, "w", encoding="utf-8") as f:
-            f.write(html_content)
+        if formato == "pdf":
+            from weasyprint import HTML  # import perezoso: solo si se pide PDF
+            HTML(string=html_content).write_pdf(output_path)
+        else:
+            with open(output_path, "w", encoding="utf-8") as f:
+                f.write(html_content)
 
         report_id = conn.execute(
             text(
                 """INSERT INTO reports (assessment_id, resumen_ejecutivo, pdf_path)
                    VALUES (:aid, :resumen, :path) RETURNING id"""
             ),
-            {
-                "aid": assessment_id,
-                "resumen": resumen_ejecutivo,
-                "path": pdf_path,
-            },
+            {"aid": assessment_id, "resumen": resumen_ejecutivo, "path": output_path},
         ).scalar()
 
-    return {
-        "report_id": report_id,
-        "pdf_path": pdf_path,
-    }
+    return {"report_id": report_id, "path": output_path, "formato": formato}

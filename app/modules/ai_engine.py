@@ -14,8 +14,7 @@ import os
 import json
 from anthropic import Anthropic
 
-MODEL = "claude-sonnet-4-6"
-
+MODEL = "claude-sonnet-5"
 _client = None
 
 

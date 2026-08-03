@@ -14,31 +14,68 @@ from sqlalchemy import text
 
 
 def registrar_activos(assessment_id: int, activos: list[dict]) -> list[int]:
-    """
-    activos: lista de dicts tipo
-      {"nombre": "PLC-Linea3", "tipo": "PLC", "fabricante": "Siemens",
-       "ubicacion": "Planta 2", "criticidad_negocio": 8}
-    Devuelve los ids insertados. Usa la tabla control_evaluations con
-    origen='asset_discovery' solo como registro de inventario base
-    (evaluación pendiente), no como hallazgo cerrado.
-    """
+
     ids = []
+
     with engine.begin() as conn:
+
         for activo in activos:
-            row_id = conn.execute(
+
+            asset_id = conn.execute(
+
                 text(
-                    """INSERT INTO control_evaluations
-                       (assessment_id, control_id, estado, criticidad, evidencia, origen)
-                       VALUES (:aid, NULL, 'Pendiente de evaluar', :crit, :evidencia, 'asset_discovery')
-                       RETURNING id"""
+                    """
+                    INSERT INTO assets
+                    (
+                        assessment_id,
+                        nombre,
+                        tipo,
+                        fabricante,
+                        modelo,
+                        ip,
+                        mac,
+                        sistema_operativo,
+                        firmware,
+                        ubicacion,
+                        zona_purdue,
+                        criticidad
+                    )
+                    VALUES
+                    (
+                        :assessment_id,
+                        :nombre,
+                        :tipo,
+                        :fabricante,
+                        :modelo,
+                        :ip,
+                        :mac,
+                        :so,
+                        :firmware,
+                        :ubicacion,
+                        :zona,
+                        :criticidad
+                    )
+                    RETURNING id
+                    """
                 ),
+
                 {
-                    "aid": assessment_id,
-                    "crit": activo.get("criticidad_negocio", 5),
-                    "evidencia": f"Activo descubierto: {activo.get('nombre')} "
-                    f"({activo.get('tipo', 'desconocido')}, {activo.get('fabricante', '-')}) "
-                    f"en {activo.get('ubicacion', 'sin ubicación')}",
+                    "assessment_id": assessment_id,
+                    "nombre": activo.get("nombre"),
+                    "tipo": activo.get("tipo"),
+                    "fabricante": activo.get("fabricante"),
+                    "modelo": activo.get("modelo"),
+                    "ip": activo.get("ip"),
+                    "mac": activo.get("mac"),
+                    "so": activo.get("sistema_operativo"),
+                    "firmware": activo.get("firmware"),
+                    "ubicacion": activo.get("ubicacion"),
+                    "zona": activo.get("zona_purdue"),
+                    "criticidad": activo.get("criticidad_negocio", 3),
                 },
+
             ).scalar()
-            ids.append(row_id)
+
+            ids.append(asset_id)
+
     return ids

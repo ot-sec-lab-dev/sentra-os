@@ -39,6 +39,43 @@ CREATE TABLE IF NOT EXISTS assessments (
 );
 
 -- ============================================================
+-- Inventario de activos descubierto durante el assessment
+-- ============================================================
+CREATE TABLE IF NOT EXISTS assets (
+    id SERIAL PRIMARY KEY,
+
+    assessment_id INTEGER NOT NULL
+        REFERENCES assessments(id) ON DELETE CASCADE,
+
+    nombre TEXT NOT NULL,
+
+    tipo TEXT,                    -- PLC, HMI, Switch, Firewall, Servidor...
+
+    fabricante TEXT,
+
+    modelo TEXT,
+
+    ip TEXT,
+
+    mac TEXT,
+
+    sistema_operativo TEXT,
+
+    firmware TEXT,
+
+    ubicacion TEXT,
+
+    zona_purdue INTEGER,
+
+    criticidad INTEGER DEFAULT 3,
+
+    created_at TIMESTAMP DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_assets_assessment
+ON assets(assessment_id);
+
+-- ============================================================
 -- LA PIEZA CLAVE: conocimiento estructurado por control evaluado.
 -- No es "true/false" — es un hallazgo completo con evidencia,
 -- impacto de negocio, quick win propuesto y coste estimado.

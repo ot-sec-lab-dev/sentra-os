@@ -42,4 +42,5 @@ def registrar_respuesta_entrevista(assessment_id: int, respuesta: dict) -> int:
         coste_estimado=respuesta.get("coste_estimado", ""),
         horas=respuesta.get("horas"),
         origen="entrevista",
+        asset_id=respuesta.get("asset_id"),
     )

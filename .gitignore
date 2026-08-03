@@ -33,3 +33,7 @@ app/output/
 
 # Docker
 *.pid
+
+# Generated reports
+sentra_os_informe_*.pdf
+sentra_os_informe_*.html

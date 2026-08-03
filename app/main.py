@@ -95,6 +95,7 @@ class HallazgoIn(BaseModel):
     quick_win: str = ""
     coste_estimado: str = ""
     horas: int | None = None
+    asset_id: int | None = None
 
 
 @app.post("/assessments/{assessment_id}/interview")
@@ -140,7 +141,7 @@ def generar_roadmap(assessment_id: int):
 # AI Report Builder (AI Engine + Report Engine + PDF Builder)
 # ---------------------------------------------------------------
 @app.post("/assessments/{assessment_id}/report")
-def generar_informe(assessment_id: int, usar_ia: bool = True):
+def generar_informe(assessment_id: int, usar_ia: bool = True, formato: str = "html"):
     resumen = ""
     if usar_ia:
         with engine.begin() as conn:
@@ -177,7 +178,7 @@ def generar_informe(assessment_id: int, usar_ia: bool = True):
             )
 
     try:
-        return report_engine.generar_informe(assessment_id, resumen_ejecutivo=resumen)
+        return report_engine.generar_informe(assessment_id, resumen_ejecutivo=resumen, formato=formato)
     except ValueError as e:
         raise HTTPException(400, str(e))
 
@@ -215,14 +216,39 @@ def dashboard_ejecutivo(assessment_id: int):
         ).fetchall()
 
     return {
-        "score": score_row[0] if score_row else None,
-        "nivel": score_row[1] if score_row else None,
-        "desglose_por_framework": score_row[2] if score_row else {},
+        "assessment_id": assessment_id,
+
+        "riesgo_global": {
+            "score": score_row[0] if score_row else None,
+            "nivel": score_row[1] if score_row else None,
+            "frameworks": score_row[2] if score_row else {},
+        },
+
+        "indicadores": {
+            "hallazgos_criticos": len(
+                [r for r in top_riesgos if r[2] >= 8]
+            ),
+            "hallazgos_totales": len(top_riesgos),
+            "fases_roadmap": len(roadmap_resumen),
+        },
+
         "top_riesgos": [
-            {"codigo": r[0], "nombre": r[1], "criticidad": r[2], "estado": r[3]} for r in top_riesgos
+            {
+                "codigo": r[0],
+                "nombre": r[1],
+                "criticidad": r[2],
+                "estado": r[3],
+            }
+            for r in top_riesgos
         ],
-        "roadmap_resumen": [
-            {"fase": r[0], "items": r[1], "horas_totales": r[2]} for r in roadmap_resumen
+
+        "roadmap": [
+            {
+                "fase": r[0],
+                "items": r[1],
+                "horas": r[2],
+            }
+            for r in roadmap_resumen
         ],
     }
 # ---------------------------------------------------------------

@@ -121,6 +121,7 @@ def registrar_evaluacion(
     coste_estimado: str = "",
     horas: int | None = None,
     origen: str = "cuestionario",
+    asset_id: int | None = None,
 ) -> int:
     """
     Inserta un objeto de conocimiento completo (control_evaluation).
@@ -137,9 +138,9 @@ def registrar_evaluacion(
             text(
                 """INSERT INTO control_evaluations
                    (assessment_id, control_id, estado, criticidad, evidencia,
-                    impacto, quick_win, coste_estimado, horas, origen)
+                    impacto, quick_win, coste_estimado, horas, origen, asset_id)
                    VALUES (:aid, :cid, :estado, :crit, :evidencia,
-                           :impacto, :quick_win, :coste, :horas, :origen)
+                           :impacto, :quick_win, :coste, :horas, :origen, :asset_id)
                    RETURNING id"""
             ),
             {
@@ -153,6 +154,7 @@ def registrar_evaluacion(
                 "coste": coste_estimado,
                 "horas": horas,
                 "origen": origen,
+                "asset_id": asset_id,
             },
         ).scalar()
     return row_id
