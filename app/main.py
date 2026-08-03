@@ -17,7 +17,18 @@ from sqlalchemy import text
 
 from db import engine
 from modules.controls_catalog import cargar_catalogo, listar_controles
-from modules import asset_discovery, interview_engine, questionnaire, risk_engine, roadmap_engine, report_engine, ai_engine
+from modules import (
+    asset_discovery,
+    asset_risk_engine,
+    asset_baseline_engine,
+    asset_dashboard,
+    interview_engine,
+    questionnaire,
+    risk_engine,
+    roadmap_engine,
+    report_engine,
+    ai_engine,
+)
 
 app = FastAPI(title="Sentra OS — OT Assessment Engine")
 
@@ -76,6 +87,16 @@ class ActivosIn(BaseModel):
     activos: list[dict]
 
 
+class BaselineIn(BaseModel):
+    baseline_name: str
+    expected_value: str | None = None
+    current_value: str | None = None
+    compliance: bool = False
+
+
+class BaselinesIn(BaseModel):
+    baselines: list[BaselineIn]
+
 @app.post("/assessments/{assessment_id}/assets")
 def cargar_activos(assessment_id: int, body: ActivosIn):
     ids = asset_discovery.registrar_activos(assessment_id, body.activos)
@@ -117,6 +138,27 @@ def registrar_cuestionario(assessment_id: int, body: CuestionarioIn):
         assessment_id, [r.dict() for r in body.respuestas]
     )
 
+@app.post("/assets/{asset_id}/baselines")
+def registrar_baseline(asset_id: int, body: BaselinesIn):
+
+    ids = []
+
+    for baseline in body.baselines:
+        ids.append(
+            asset_baseline_engine.registrar_baseline(
+                asset_id,
+                baseline.model_dump()
+            )
+        )
+
+    return {"registrados": ids}
+
+@app.get("/assets/{asset_id}/baselines")
+def obtener_baselines(asset_id: int):
+
+    return {
+        "baselines": asset_baseline_engine.obtener_baselines(asset_id)
+    }
 
 # ---------------------------------------------------------------
 # Risk Engine
@@ -137,6 +179,24 @@ def generar_roadmap(assessment_id: int):
     return {"roadmap": roadmap_engine.generar_roadmap(assessment_id)}
 
 
+# ---------------------------------------------------------------
+# Asset Risk Engine
+# ---------------------------------------------------------------
+@app.post("/assessments/{assessment_id}/asset-risk")
+def calcular_riesgo_activos(assessment_id: int):
+    return {
+        "assets": asset_risk_engine.calcular_riesgo_activos(assessment_id)
+    }
+
+
+@app.get("/assessments/{assessment_id}/assets/dashboard")
+def dashboard_activos(assessment_id: int):
+
+    return {
+        "assets": asset_dashboard.obtener_dashboard_activos(assessment_id)
+    }
+
+    
 # ---------------------------------------------------------------
 # AI Report Builder (AI Engine + Report Engine + PDF Builder)
 # ---------------------------------------------------------------

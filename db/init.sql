@@ -69,11 +69,49 @@ CREATE TABLE IF NOT EXISTS assets (
 
     criticidad INTEGER DEFAULT 3,
 
+    owner TEXT,
+
+    estado TEXT DEFAULT 'Activo',
+
+    last_seen TIMESTAMP,
+
+    criticidad_negocio INTEGER DEFAULT 5,
+
     created_at TIMESTAMP DEFAULT now()
 );
 
 CREATE INDEX IF NOT EXISTS idx_assets_assessment
 ON assets(assessment_id);
+
+CREATE TABLE IF NOT EXISTS asset_risk_profiles (
+    id SERIAL PRIMARY KEY,
+
+    asset_id INTEGER NOT NULL
+        REFERENCES assets(id) ON DELETE CASCADE,
+
+    assessment_id INTEGER NOT NULL
+        REFERENCES assessments(id) ON DELETE CASCADE,
+
+    risk_score NUMERIC(5,2),
+
+    risk_level TEXT,
+
+    business_criticality INTEGER,
+
+    exposure INTEGER,
+
+    vulnerabilities INTEGER,
+
+    controls_missing INTEGER,
+
+    calculated_at TIMESTAMP DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_asset_risk_asset
+ON asset_risk_profiles(asset_id);
+
+CREATE INDEX IF NOT EXISTS idx_asset_risk_assessment
+ON asset_risk_profiles(assessment_id);
 
 -- ============================================================
 -- LA PIEZA CLAVE: conocimiento estructurado por control evaluado.
