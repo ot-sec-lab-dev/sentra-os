@@ -1,8 +1,6 @@
 # 🛡️ Sentra OS
 
-<p align="center">
-  <img src="docs/images/sentra-banner.png" alt="Sentra OS Banner" width="100%">
-</p>
+
 
 ### AI-Powered OT Cybersecurity Assessment Platform
 
@@ -126,6 +124,20 @@ DB --> J[MITRE ATT&CK ICS]
 DB --> K[Assets]
 DB --> L[Assessments]
 ```
+
+## System Architecture
+
+<p align="center">
+  <img src="docs/images/architecture.png" width="100%">
+</p>
+
+---
+
+## REST API (Swagger)
+
+<p align="center">
+  <img src="docs/images/swagger-api.png" width="100%">
+</p>
 
 ---
 
