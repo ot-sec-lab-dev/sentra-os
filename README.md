@@ -1,5 +1,9 @@
 # 🛡️ Sentra OS
 
+<p align="center">
+  <img src="docs/images/sentra-banner.png" alt="Sentra OS Banner" width="100%">
+</p>
+
 ### AI-Powered OT Cybersecurity Assessment Platform
 
 **Assess · Discover · Prioritize · Remediate**
